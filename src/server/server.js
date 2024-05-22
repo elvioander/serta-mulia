@@ -27,14 +27,21 @@ const InputError = require('../exceptions/InputError');
         if (response instanceof InputError) {
             const newResponse = h.response({
                 status: 'fail',
-                message: `Terjadi kesalahan dalam melakukan prediksi`
+                message: 'Terjadi kesalahan dalam melakukan prediksi'
             })
             newResponse.code(response.statusCode)
             return newResponse;
         }
  
         if (response.isBoom) {
-
+            if (response.output.statusCode === 413) {
+                return h
+                  .response({
+                    status: "fail",
+                    message: "Payload content length greater than maximum allowed: 1000000",
+                  })
+                  .code(413);
+              }
             const newResponse = h.response({
                 status: 'fail',
                 message: response.message
@@ -47,5 +54,5 @@ const InputError = require('../exceptions/InputError');
     });
  
     await server.start();
-    console.log(`Server start at: ${server.info.uri}`);
+    console.log('Server start at: ${server.info.uri}');
 })();
